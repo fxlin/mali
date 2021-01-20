@@ -1,31 +1,21 @@
 Table of Contents
 =================
-
-Header: X-Frame-Options=deny
-Header: Content-Security-Policy=default-src 'none'
-Header: Date=Wed, 20 Jan 2021 19:01:45 GMT
-Header: Content-Type=text/html;charset=utf-8
-Header: X-Commonmarker-Version=0.21.0
-Header: Access-Control-Allow-Origin=*
-Header: Vary=Accept-Encoding, Accept, X-Requested-With
-Header: X-Github-Request-Id=395C:154D:8174D3:11A9518:60087E19
-Header: X-Ratelimit-Limit=60
-Header: X-Ratelimit-Remaining=44
-Header: X-Content-Type-Options=nosniff
-Header: Referrer-Policy=origin-when-cross-origin, strict-origin-when-cross-origin
-Header: Server=GitHub.com
-Header: Status=200 OK
-Header: X-Ratelimit-Used=16
-Header: Strict-Transport-Security=max-age=31536000; includeSubdomains; preload
-Header: X-Ratelimit-Reset=1611172376
-Header: Access-Control-Expose-Headers=ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Used, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, Deprecation, Sunset
-Header: X-Xss-Protection=1; mode=block
 * [Why this page](#why-this-page)
 * [Mali generations](#mali-generations)
 * [COTS boards](#cots-boards)
 * [Hardware internals](#hardware-internals)
 * [Resources](#resources)
+  * [Projects](#projects)
+  * [Articles](#articles)
 * [the kernel driver](#the-kernel-driver)
+  * [Acronyms](#acronyms)
+  * [Overview](#overview)
+  * [The register interface](#the-register-interface)
+  * [Job slots](#job-slots)
+  * [Memory management](#memory-management)
+  * [Tracing](#tracing)
+  * [GPU virtual memory](#gpu-virtual-memory)
+
 
 
 # Why this page
