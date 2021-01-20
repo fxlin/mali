@@ -16,7 +16,7 @@ Table of Contents
   * [Tracing](#tracing)
   * [GPU virtual memory](#gpu-virtual-memory)
 
-
+(see toc.sh) 
 
 # Why this page
 Arm's Mali GPUs have rich docs and code, making them fun to hack/mod. This page documents what we learnt about Mali during our research. Hopefully it will help others. 
@@ -40,7 +40,7 @@ The roadmaps from Arm
 
 |                                          |      |
 | ---------------------------------------- | ---- |
-| <img src="roadmap.jpg" alt="roadmap"  /> |![roadmap2](roadmap2.png)      |
+| <img src="figs/roadmap.jpg" alt="roadmap"  /> |![roadmap2](figs/roadmap2.png)      |
 
 # COTS boards 
 
@@ -57,7 +57,7 @@ Mali T628 MP6  (OpenGL ES 3.0/2.0/1.1 and OpenCL 1.1 Full profile
 seems to have pretty good Linux desktop support
 http://ameridroid.com/t/xu4
 
-![odroidc4GPUperformance](odroidc4GPUperformance.jpg)
+![odroidc4GPUperformance](figs/odroidc4GPUperformance.jpg)
 (credits: Odroid)
 
 ### Hikey970
@@ -108,9 +108,9 @@ This is a very interesting change because, simply put, **the size of a wavefront
 ### Bifrost
 Arm's slides:
 
-|                                     |                                 |                         |
-| ----------------------------------- | ------------------------------- | ----------------------- |
-| ![bifrostshader](bifrostshader.png) | ![bifrostquad](bifrostquad.png) | ![g76quad](g76quad.png) |
+|                                          |                                      |                              |
+| ---------------------------------------- | ------------------------------------ | ---------------------------- |
+| ![bifrostshader](figs/bifrostshader.png) | ![bifrostquad](figs/bifrostquad.png) | ![g76quad](figs/g76quad.png) |
 
 *From Arm's blog (italic fonts added later)*
 
@@ -132,9 +132,9 @@ No longer "Quad engine". much wider.
 
 2x processing units per core
 
-|                             |                           |
-| --------------------------- | ------------------------- |
-| ![g77shader](g77shader.jpg) | ![g77micro](g77micro.jpg) |
+|                                  |                                |
+| -------------------------------- | ------------------------------ |
+| ![g77shader](figs/g77shader.jpg) | ![g77micro](figs/g77micro.jpg) |
 
 
 
@@ -209,7 +209,7 @@ LPU -- Logical Processing Unit. For timeline display only (?)
 
 ## Overview
 
-<img src="archoverview.png" alt="archoverview" style="zoom:75%;" />
+<img src="figs/archoverview.png" alt="archoverview" style="zoom:75%;" />
 
 ### Job chains
 
@@ -242,7 +242,7 @@ GPU_COMAMND: GPU-related (e.g. soft reset, performance counter sample, etc.)
 JS_COMMAND: Job-related (e.g. start or stop processing a job chain, etc.)
 AS_COMMAND: MMU-related (e.g. MMU lock, broadcast, etc.)
 
-![jsandtrace](jsandtrace.png)
+![jsandtrace](figs/jsandtrace.png)
 
 From Arm's [blog](https://community.arm.com/developer/tools-software/graphics/b/blog/posts/the-mali-gpu-an-abstract-machine-part-4---the-bifrost-shader-core) on command execution: 
 
@@ -257,20 +257,20 @@ From Arm's [blog](https://community.arm.com/developer/tools-software/graphics/b/
 **Reg definition**: `Mali_kbase_gpu_regmap.h` 
 
 ### Reg map
-![regmap](regmap.png)
+![regmap](figs/regmap.png)
 
 ## Job slots
 
 This is the CPU/GPU interface. 
 
-<img src="t880jobmgr.png" alt="t880jobmgr" style="zoom:75%;" />
+<img src="figs/t880jobmgr.png" alt="t880jobmgr" style="zoom:75%;" />
 
 A job slot pertains to a job type. e.g. SLOT1 is for Tiling/Vertex/Compute. Slot 1 is default one.
 
 Even the test application seems not to have any tiling/vertex, the atom comes from user runtime is not marked BASE_JD_REQ_ONLY_COMPUTE. 
 
 Kernel code below: 
-<img src="getjs.png" alt="getjs" style="zoom:75%;" />
+<img src="figs/getjs.png" alt="getjs" style="zoom:75%;" />
 
 
 ### The ringbuffer inside a job slot
@@ -287,23 +287,23 @@ The driver checks out atom state first and then put it into job_slot register.
 
 **Code snippet ** 
 
-![rbstate](rbstate.png)
+![rbstate](figs/rbstate.png)
 
 A ring buffer: two items. For current and next jobs. 
 
-![gpuinspect](gpuinspect.png)
+![gpuinspect](figs/gpuinspect.png)
 
 * regs for "next" job are R/W (==> the driver can modify them since the job is not kicked yet)
 
 * regs for "current" job are R/O (==> the job is being executed on GPU. the driver cannot do anything about the job)
 
-![jobslotdef](jobslotdef.png)
+![jobslotdef](figs/jobslotdef.png)
 
 ### Ringbuffer slot state
 
 This is well commented
 
-![slotstate](slotstate.png)
+![slotstate](figs/slotstate.png)
 
 More evidence from the NoMali project (see `jobslot.hh`)
 
@@ -407,11 +407,11 @@ Invoked upon phys page alloc/free…. Indicating changes of pages
 
 Two types of "streams". AUX and OBJ. Seems: _obj is for obj operation, like creating context, MMU. _aux is for other events, like PM, page alloc, etc. 
 
-![streamsflush](streamsflush.png)
+![streamsflush](figs/streamsflush.png)
 
 ### Sample traces dumped from the driver
 
-![sampletrace](sampletrace.png)
+![sampletrace](figs/sampletrace.png)
 
 ## GPU virtual memory
 
