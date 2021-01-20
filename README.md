@@ -1,5 +1,11 @@
-Table of Contents
-=================
+# Notes on tinkering with Arm Mali GPUs
+
+## Why this page
+
+Arm's Mali GPUs have rich docs and code, making them fun to hack/mod. This page documents what we learnt about Mali during our research. Hopefully it will help others. 
+
+Disclaimer: Many contents are from Arm's official documents and blogs. We do our best to attribute their origins. Much info is based on our own guess work & code reading. 
+
 * [Why this page](#why-this-page)
 * [Mali generations](#mali-generations)
 * [COTS boards](#cots-boards)
@@ -18,10 +24,7 @@ Table of Contents
 
 (see toc.sh) 
 
-# Why this page
-Arm's Mali GPUs have rich docs and code, making them fun to hack/mod. This page documents what we learnt about Mali during our research. Hopefully it will help others. 
 
-Disclaimer: Many contents are from Arm's official documents and blogs. We do our best to attribute their origins. Much info is based on our own guess work & code reading. 
 
 # Mali generations
 
