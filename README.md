@@ -1,5 +1,10 @@
 [TOC]
 
+## Why this page
+Arm's Mali GPUs have rich docs and code, making them fun to hack/mod. This page documents what we learnt about Mali during our research. Hopefully it will help others. 
+
+Many contents are from Arm's official documents and blogs. We do our best to attribute their origins. 
+
 ## Mali generations & devices
 
 Mali-400 (Allwinner A20/A64 boards)
@@ -18,8 +23,6 @@ The roadmaps from Arm
 |                                          |      |
 | ---------------------------------------- | ---- |
 | <img src="roadmap.jpg" alt="roadmap"  /> |![roadmap2](roadmap2.png)      |
-
-
 
 ## COTS boards for Mali hacking
 

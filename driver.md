@@ -14,23 +14,51 @@ group -- A render group, i.e. all core sharing the same Mali MMU. see `struct ma
 kbase -- the kernel driver instance for midgard 
 TLstream -- timeline stream (for trace record)
 js - job slot. As exposed by GPUs
+jc - job chain. 
 Jd - job dispatcher (in the driver)
 AS - address space (for GPU)
 LPU -- Logical Processing Unit. For timeline display only (?)
 
-## Register access 
+## Overview
+
+<img src="archoverview.png" alt="archoverview" style="zoom:75%;" />
+
+### Job chains
+
+A job chain: a binary blob of GPU executable and its metadata. Wrapped in atom structure. Bet u/k,  "struct base_jd_atom_v2" is used, see `mali_base_kernel.h`. bet k/hw "struct kbase_jd_atom" is used, check this in "mali_kbase_defs.h".
+
+kbase_jd_atom appears to be kernel's internal d/s. not shared with hw. Just to separate from the u/k interface (atom_v2), easy to change.
+
+(base_jd_atom_v2.jc /* < job-chain GPU address */)
+
+The former one passed by user and the latter is the driver's internal abstraction. Both have jc in their structure which points GPU kernel instructions I guess.
+
+One can start from `kbase_api_job_submit()` in "mali_kbase_core_linux.c" which invoked when the job submitted by user space.
+
+As both structure jc, the gpu instructions might be not different from each other. Both are baremetal. When compiling OCL kernel, we need to specify GPU model or the CL runtime checks the available GPU in the system.
+
+
+## The register interface
 
 ### Overview
 
-There are 3 main types of registers (CPU Control, Job Control, MMU Management).
+Primarily, there are 3 types of registers (CPU Control, Job Control, MMU Management).
 GPU_CTRL: GPU Control
 JOB_CTRL: JOB Control
 MMU_MGMT: MMU Control
 
-Accordingly, Mali has three types of commands.
+**Note** each type may have multiple instances. e.g. we may have a one GPU command register, 3 JS command registers, 8 AS command registers. 3 JS means you have three types of jobs e.g. shader, tiler, ... 8 AS are for multiple address spaces used by GPU, basically # of page tables the GPU can hold. Normally we only use a single page table since we do not generate multiple contexts.
+
+Three types of commands can be written to their corresponding reg types: 
 GPU_COMAMND: GPU-related (e.g. soft reset, performance counter sample, etc.)
 JS_COMMAND: Job-related (e.g. start or stop processing a job chain, etc.)
 AS_COMMAND: MMU-related (e.g. MMU lock, broadcast, etc.)
+
+![jsandtrace](jsandtrace.png)
+
+From Arm's [blog](https://community.arm.com/developer/tools-software/graphics/b/blog/posts/the-mali-gpu-an-abstract-machine-part-4---the-bifrost-shader-core) on command execution: 
+
+> "The workload in each queue is broken into smaller pieces and dynamically distributed across all of the shader cores in the GPU, or in the case of tiling workloads to a fixed function tiling unit. Workloads from both queues can be processed by a shader core at the same time; for example, vertex processing and fragment processing for different render targets can be running in parallel" 
 
 ### Code
 `Mali_kbas_device_hw_.c`
@@ -42,6 +70,57 @@ AS_COMMAND: MMU-related (e.g. MMU lock, broadcast, etc.)
 
 ### Reg map
 ![regmap](regmap.png)
+
+## Job slots
+
+This is the CPU/GPU interface. 
+
+<img src="t880jobmgr.png" alt="t880jobmgr" style="zoom:75%;" />
+
+A job slot pertains to a job type. e.g. SLOT1 is for Tiling/Vertex/Compute. Slot 1 is default one.
+
+Even the test application seems not to have any tiling/vertex, the atom comes from user runtime is not marked BASE_JD_REQ_ONLY_COMPUTE. 
+
+Kernel code below: 
+
+<img src="getjs.png" alt="getjs" style="zoom:75%;" />
+
+
+
+### The ringbuffer inside a job slot
+
+GPU is aware of the "current" and "next" jobs. A ringbuffer (rb) seems managed by driver. The ringbuffer seems to track the "current" and "next" jobs on GPU. A ringbuffer can hold 2 jobs max. The driver puts jobs it intends to submit next, or already submitted, in the ringbuffer. 
+
+Device driver manages jobs (atoms) by putting them into ring buffer (atoms and ring buffers managed by device driver).
+
+Basically, device driver pulls runnable atom from queue and writes it to hardware job slot register, then kick GPU.
+
+So ringbuffer is managed by device driver and a next atom to run is determined by device driver. It seems GPU only cares about atom written to job slots (check the next job slot and command, then do the things based on command).
+
+The driver checks out atom state first and then put it into job_slot register.
+
+**Code snippet ** 
+
+![rbstate](rbstate.png)
+
+A ring buffer: two items. For current and next jobs. 
+
+![gpuinspect](gpuinspect.png)
+
+* regs for "next" job are R/W (==> the driver can modify them since the job is not kicked yet)
+
+* regs for "current" job are R/O (==> the job is being executed on GPU. the driver cannot do anything about the job)
+
+![jobslotdef](jobslotdef.png)
+
+### Ringbuffer slot state
+
+This is well commented
+
+![slotstate](slotstate.png)
+
+More evidence from the NoMali project (see `jobslot.hh`)
+
 
 
 ## Memory management  
