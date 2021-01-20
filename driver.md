@@ -1,7 +1,5 @@
 # the Linux kernel driver 
 
-*(Much of these info is based through guess work & code reading)*
-
 [TOC]
 
 ## Acronyms 
@@ -120,7 +118,6 @@ This is well commented
 ![slotstate](slotstate.png)
 
 More evidence from the NoMali project (see `jobslot.hh`)
-
 
 
 ## Memory management  
