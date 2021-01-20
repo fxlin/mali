@@ -175,6 +175,150 @@ From kernel configuration: "This option enables an example implementation of a m
 
 There's also "physical mem group manager"? See the devicetree binding `memory_group_manager.txt`
 
- 
+ ## Tracing 
 
- 
+mali_kbase_tracepoints.[ch] useful. note they are auto-gen by some python code, missing in the kernel tree. 
+
+There’s also debugfs support (MALI_MIDGARD_ENABLE_TRACE)
+
+### Mali_kbase_tracepoints.c
+
+*These seem all streamline events. Where do they go? via u/k buffer to Streamline?*
+
+```
+/* Message ids of trace events that are recorded in the timeline stream. */
+enum tl_msg_id_obj {
+	KBASE_TL_NEW_CTX,
+	KBASE_TL_NEW_GPU,
+
+
+#define OBJ_TL_LIST \
+	TP_DESC(KBASE_TL_NEW_CTX, \
+		"object ctx is created", \
+		"@pII", \
+		"ctx,ctx_nr,tgid") \
+```
+
+### Timeline stream abstraction
+
+See very well documented
+
+**mali_kbase_tlstream.h** 
+
+Who will consume the stream? 
+
+### Timeline infrastructure
+
+**Mali_kbase_timeline.c**
+
+**mali_kbase_timeline.h**
+
+kbase_timeline_streams_flush(). To be invoked by user? It appears timeline shares a buffer with userspace? Flush to userspace? How is this done? 
+
+**KBASE_AUX_PAGESALLOC**
+
+Invoked upon phys page alloc/free…. Indicating changes of pages
+
+### Streams
+
+Two types of "streams". AUX and OBJ. Seems: _obj is for obj operation, like creating context, MMU. _aux is for other events, like PM, page alloc, etc. 
+
+![streamsflush](streamsflush.png)
+
+### Sample traces dumped from the driver
+
+![sampletrace](sampletrace.png)
+
+## GPU virtual memory
+
+### Top level funcs: 
+Mali_base_mmu.h // well written
+
+### MMU
+GPU MMU is programmed by CPU. 
+
+Looks like a 4 level pgtable?? (this is for Bifrost.. They didn’t change the macro names)
+	#define MIDGARD_MMU_TOPLEVEL    MIDGARD_MMU_LEVEL(0)
+	#define MIDGARD_MMU_BOTTOMLEVEL MIDGARD_MMU_LEVEL(3)
+See kbase_mmu_teardown_pages()
+
+For Midgard, 2 levels. 
+
+Update hw mmu entries??
+
+kbase_mmu_hw_configure, called by mmu_update(), by kbase_mmu_update
+
+
+#### Reg defs
+see `mali_kbase_gpu_regmap.h`Max 16 addr spaces
+
+#### d/s
+
+struct kbase_mmu_table  - object representing a set of GPU page tables. @pgd -- pgtable root (hw address)
+
+struct kbase_mmu_mode - object containing pointer to methods invoked for programming the MMU, as per the MMU mode supported by Hw.
+
+struct kbase_as - object representing an address space of GPU.
+
+One kbase_device has many (up to 16) kbase_as `struct kbase_as as[BASE_MAX_NR_AS]`;
+	
+Each @kbase_context has a @as_nr, which seems to point to the as. 
+
+#### Code
+drivers\gpu\arm\midgard\mmu
+
+High level MMU function
+kbase_mmu_flush_invalidate_noretain()
+
+(..goes into…)
+The actual hw function operating MMU:
+Mali_kbase_mmu_hw_direct.c  --> kbase_mmu_hw_do_operation(), etc.
+
+#### Pgtable 
+Allocate page table for GPU
+kbase_mmu_alloc_pgd()
+
+#### Kernel threads
+Workqueue mali_mmu
+page_fault_worker
+bus_fault_worker
+
+#### Address space
+This is like "segment". One addr space seems a tree of pgtables. 
+The  actual count of addr spaces…. Supported by MMU hardware
+```
+ * @nr_hw_address_spaces:  Number of address spaces actually available in the
+                          GPU, remains constant after driver initialisation.
+ * @nr_user_address_spaces: Number of address spaces available to user contexts
+```
+// 8 for G71
+
+See
+kbase_device_as_init()
+
+```
+// desc for one addr space… 
+struct kbase_mmu_setup {
+	u64	transtab; // translation table? See AS_TRANSTAB_BASE_MASK
+	u64	memattr;
+	u64	transcfg; // translation cfg? See AS_TRANSCFG_ADRMODE_AARCH64_4K etc.
+};
+```
+
+Configuration 
+kbase_mmu_get_as_setup()
+
+#### Mmap path 
+Right, at that time that only allocate page for GPU pgtable only. 
+
+Think mapping happen when mmap() is called, which invokes kbase_mmap() and t thus kbase_context_mmap().
+There is a structure called "kbase_va_region" which contains some mapping related information.
+
+Basically, pages are allocated in GPU side and then CPU calls kbase_mmap to get the allocated pages from GPU side.
+Look at kbase_reg_mmap() and kbase_gpu_mmap(). It tries to let GPU use same VA of CPU and maps the VA to PA updating MMU.
+
+
+
+
+
+
