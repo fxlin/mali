@@ -1,5 +1,3 @@
-[TOC]
-
 Table of Contents
 =================
 
