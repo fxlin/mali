@@ -1,5 +1,11 @@
 # Notes on tinkering with Arm Mali GPUs
 
+
+see Heejin's pages for more information:
+
+https://bakhi.github.io/mobileGPU/
+
+
 ## Why this page
 
 Arm's Mali GPUs have rich docs and code, making them fun to hack/mod. This page documents what we learnt about Mali during our research. Hopefully it will help others. 
