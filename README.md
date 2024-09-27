@@ -1,9 +1,16 @@
 # Notes on tinkering with Arm Mali GPUs
 
 
-see Heejin's pages for more information:
+See Heejin's pages for much richer information:
 
 https://bakhi.github.io/mobileGPU/
+
+
+Our papers:
+
+* Safe and Practical GPU Computation in TrustZone, Heejin Park and Felix Xiaozhu Lin, in Proc. EuroSys, May. 2023
+  
+* GPUReplay: A 50-KB GPU Stack for Client ML, Heejin Park and Felix Xiaozhu Lin, in Proc. ASPLOS, Mar. 2022 
 
 
 ## Why this page
